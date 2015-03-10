@@ -3,6 +3,7 @@
 #include <limits>
 #include <math.h>
 #include <string>
+#include <algorithm>
 
 using namespace std;
 
@@ -82,6 +83,18 @@ int max(int a, int b)
     return (a > b)? a : b;
 }
 
+int min(int a, int b)
+{
+    return (a < b)? a : b;
+}
+
+// Returns Minimum among a, b, c
+int Minimum(int a, int b, int c)
+{
+    return min(min(a, b), c);
+}
+
+
 void longestCommonSubsequence(string s1, string s2)
 {
    int LCS[s1.length()+1][s2.length()+1];
@@ -160,16 +173,125 @@ void longestCommonSubsequence(string s1, string s2)
 
 }
 
+int minEditDistance(const string& x1, const string& x2)
+{
+   vector<vector<int> > D;
+
+   int m = x1.length();
+   int n = x2.length();
+
+   for(int i = 0; i <= m; i++)
+   {
+    vector<int> temp;
+    for(int j = 0; j <= n; j++)
+    {
+      temp.push_back(0);
+    }
+    D.push_back(temp);
+   }
+
+   for(int i = 1; i <= m ; i++)
+   {
+    D[i][0] = i;
+   }
+
+   for(int j = 1; j <= n ; j++)
+   {
+    D[0][j] = j;
+   }
+
+
+   int insertionCost = 0, deletionCost = 0, replacementCost = 0;
+   for(int i = 1; i <= m; i++)
+   {
+    for(int j = 1; j <= n; j++)
+    {
+      replacementCost = D[i-1][j-1] + (x1[i-1] == x2[j-1] ? 0 : 1);
+      insertionCost   = D[i-1][j] + 1;
+      deletionCost    = D[i][j-1] + 1; 
+ 
+      D[i][j]         = Minimum(replacementCost, insertionCost, deletionCost);
+
+    }
+   }
+
+   return D[m][n];
+}
+
+void reverseStr(const string& input, string& output)
+{
+  char temp[input.length()+1];
+
+  for(int i = input.length()-1, j = 0; i>=0 ; i--, j++)
+  {
+    temp[j] = input[i];
+  }
+  temp[input.length()]   = '\0';
+
+  output    = temp;
+}
+
+void longestPalindromeSubsequence(const string& s1)
+{
+
+    
+    string s2;
+    reverseStr(s1, s2);
+
+    longestCommonSubsequence(s1, s2);
+    
+
+    int palindomLen[s1.length()][s1.length()];
+
+    for(int i = 0; i < s1.length(); i++)
+    {
+      palindomLen[i][i] = 1;
+    }
+
+
+    for(int len = 1; len < s1.length(); len++)
+    {
+      for(int j = 0; (j+len) < s1.length(); j++)
+      {
+        if(len == 1 && s1[j] == s1[j+len])
+        {
+          palindomLen[j][j+len] = 2;
+        }
+        else if (len > 1) 
+        {
+           if(s1[j] == s1[j+len])
+           {
+             palindomLen[j][j+len] = 2 + palindomLen[j+1][j+len-1];
+           } 
+           else if (len == 2)
+           {
+            palindomLen[j][j+len] = 1;
+           }
+           else
+           { 
+            palindomLen[j][j+len] = max(palindomLen[j+1][j+len], palindomLen[j][j+len-1]);
+           }
+        }
+      }
+    }
+
+    cout << "\nLCS is " << palindomLen[0][s1.length()-1] << endl;
+
+
+}
 
 int main()
 {
     vector<int> v {-1, -1, -1, -10, -10, -10, -2};
 
-    findNoAppearingOnce(v);
+    //findNoAppearingOnce(v);
 
-    string s ("ABC");
+    string s ("GEEKSFORGEEKS");
     //stringPermuations(s, 0, s.length());
-    longestCommonSubsequence("AGGTAB", "GXTXAYB");
+    //longestCommonSubsequence("AGGTAB", "GXTXAYB");
 
-	return 0;
+    //cout << minEditDistance("ABC", "ABD");
+
+    longestPalindromeSubsequence(s);
+  	return 0;
 }
